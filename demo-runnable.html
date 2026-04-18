@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Anti-Fark Etmez — Kararsız arkadaş grupları için rastgele karar verici." />
+  <title>Anti-Fark Etmez | Karar Verici</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+
+  <!-- React -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* ── Design Tokens ── */
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #16161f;
+      --bg-card-hover: #1c1c28;
+      --accent-primary: #f5a623;
+      --accent-secondary: #ffd166;
+      --accent-glow: rgba(245,166,35,0.25);
+      --accent-gradient: linear-gradient(135deg, #f5a623 0%, #ffd166 100%);
+      --success: #34d399;
+      --success-glow: rgba(52,211,153,0.25);
+      --danger: #f87171;
+      --danger-glow: rgba(248,113,113,0.25);
+      --text-primary: #f0f0f5;
+      --text-secondary: rgba(240,240,245,0.6);
+      --text-muted: rgba(240,240,245,0.35);
+      --text-on-accent: #0a0a0f;
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-accent: rgba(245,166,35,0.3);
+      --shadow-glow: 0 0 30px var(--accent-glow);
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --transition-base: 250ms cubic-bezier(0.4,0,0.2,1);
+      --transition-spring: 500ms cubic-bezier(0.34,1.56,0.64,1);
+      --max-width: 560px;
+      --nav-height: 72px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(ellipse at 20% 20%, rgba(245,166,35,0.04) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 80%, rgba(255,209,102,0.03) 0%, transparent 50%);
+      pointer-events: none; z-index: -1;
+    }
+    ::selection { background: rgba(245,166,35,0.3); }
+
+    /* ── Animations ── */
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes revealResult { from { opacity:0; transform:translateY(12px) scale(0.96); filter:blur(4px); } to { opacity:1; transform:translateY(0) scale(1); filter:blur(0); } }
+    @keyframes popIn { 0% { transform:scale(0.5); opacity:0; } 70% { transform:scale(1.08); } 100% { transform:scale(1); opacity:1; } }
+    @keyframes slideInLeft { from { opacity:0; transform:translateX(-20px); } to { opacity:1; transform:translateX(0); } }
+
+    /* ── Layout ── */
+    .app-container { min-height: 100vh; display: flex; flex-direction: column; }
+    .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding: calc(var(--nav-height) + 2rem) 1.25rem 3rem; }
+
+    /* ── Navbar ── */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-height); display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; background: rgba(10,10,15,0.8);
+      backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid var(--border-subtle);
+    }
+    .navbar__brand { display:flex; align-items:center; gap:0.6rem; cursor:pointer; text-decoration:none; }
+    .navbar__logo { font-size:1.6rem; animation: float 3s ease-in-out infinite; }
+    .navbar__title {
+      font-weight:800; font-size:1.25rem; letter-spacing:-0.02em;
+      background: var(--accent-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .navbar__links { display:flex; gap:0.25rem; background:var(--bg-secondary); border-radius:var(--radius-full); padding:4px; border:1px solid var(--border-subtle); }
+    .navbar__link {
+      display:flex; align-items:center; gap:0.4rem; padding:0.5rem 1.2rem;
+      border:none; border-radius:var(--radius-full); background:transparent;
+      color:var(--text-secondary); font-family:var(--font-sans); font-weight:500; font-size:0.875rem;
+      cursor:pointer; transition:all var(--transition-base); white-space:nowrap;
+    }
+    .navbar__link:hover { color:var(--text-primary); }
+    .navbar__link--active { background:var(--accent-gradient); color:var(--text-on-accent); box-shadow:var(--shadow-glow); }
+
+    /* ── Home ── */
+    .home-page { display:flex; flex-direction:column; align-items:center; width:100%; max-width:var(--max-width); gap:2rem; }
+    .home-hero { text-align:center; padding:1rem 0; animation: fadeInUp 0.6s ease both; }
+    .home-hero__icon { font-size:3.5rem; margin-bottom:1rem; display:inline-block; animation: float 3s ease-in-out infinite; }
+    .home-hero__title { font-size:2rem; font-weight:800; letter-spacing:-0.03em; line-height:1.2; margin-bottom:0.5rem; }
+    .home-hero__title span { background:var(--accent-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .home-hero__subtitle { font-size:0.95rem; color:var(--text-secondary); max-width:360px; margin:0 auto; line-height:1.5; }
+    .home-categories { display:flex; flex-direction:column; gap:0.75rem; width:100%; animation: fadeInUp 0.6s ease 0.15s both; }
+    .home-result { width:100%; display:flex; justify-content:center; min-height:80px; }
+
+    /* ── Category Buttons ── */
+    .category-btn {
+      position:relative; display:flex; align-items:center; gap:1rem; width:100%; padding:1.1rem 1.5rem;
+      background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md);
+      color:var(--text-primary); font-family:var(--font-sans); font-weight:600; font-size:1.05rem;
+      cursor:pointer; transition:all var(--transition-base); text-align:left;
+    }
+    .category-btn::after { content:'→'; margin-left:auto; font-size:1.2rem; color:var(--text-muted); transition:all var(--transition-base); }
+    .category-btn:hover { background:var(--bg-card-hover); border-color:var(--border-accent); box-shadow:var(--shadow-glow); transform:translateY(-2px); }
+    .category-btn:hover::after { color:var(--accent-primary); transform:translateX(4px); }
+    .category-btn:active { transform:translateY(0) scale(0.98); }
+    .category-btn__emoji { font-size:1.6rem; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:rgba(245,166,35,0.08); border-radius:var(--radius-sm); flex-shrink:0; }
+    .category-btn__info { display:flex; flex-direction:column; }
+    .category-btn__title { font-weight:600; font-size:1rem; }
+    .category-btn__subtitle { font-weight:400; font-size:0.78rem; color:var(--text-muted); margin-top:0.15rem; }
+
+    /* ── Decision Card ── */
+    .decision-card { position:relative; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:2rem; width:100%; max-width:var(--max-width); overflow:hidden; animation: revealResult 0.5s var(--transition-spring) both; }
+    .decision-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--accent-gradient); }
+    .decision-card__label { display:inline-block; font-family:var(--font-mono); font-size:0.7rem; font-weight:500; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent-primary); background:rgba(245,166,35,0.08); border:1px solid rgba(245,166,35,0.15); padding:0.3rem 0.8rem; border-radius:var(--radius-full); margin-bottom:1rem; }
+    .decision-card__result { font-size:2rem; font-weight:800; margin-bottom:1.5rem; line-height:1.2; letter-spacing:-0.02em; }
+    .decision-card__actions { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+    .decision-card__btn { display:flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.85rem 1rem; border:1px solid transparent; border-radius:var(--radius-md); font-family:var(--font-sans); font-weight:600; font-size:0.95rem; cursor:pointer; transition:all var(--transition-base); }
+    .decision-card__btn--approve { background:rgba(52,211,153,0.1); border-color:rgba(52,211,153,0.2); color:var(--success); }
+    .decision-card__btn--approve:hover { background:rgba(52,211,153,0.2); box-shadow:0 0 20px var(--success-glow); transform:translateY(-2px); }
+    .decision-card__btn--reject { background:rgba(248,113,113,0.1); border-color:rgba(248,113,113,0.2); color:var(--danger); }
+    .decision-card__btn--reject:hover { background:rgba(248,113,113,0.2); box-shadow:0 0 20px var(--danger-glow); transform:translateY(-2px); }
+    .decision-card__btn:active { transform:scale(0.96); }
+    .decision-card__feedback { display:flex; align-items:center; gap:0.6rem; padding:0.85rem 1rem; border-radius:var(--radius-md); font-weight:600; font-size:0.9rem; animation: popIn 0.4s var(--transition-spring) both; }
+    .decision-card__feedback--approved { background:rgba(52,211,153,0.1); color:var(--success); border:1px solid rgba(52,211,153,0.2); }
+    .decision-card__feedback--rejected { background:rgba(248,113,113,0.1); color:var(--danger); border:1px solid rgba(248,113,113,0.2); }
+
+    /* ── Spinner ── */
+    .loading-spinner { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 1rem; gap:1.2rem; }
+    .loading-spinner__ring { position:relative; width:48px; height:48px; }
+    .loading-spinner__ring::before, .loading-spinner__ring::after { content:''; position:absolute; inset:0; border-radius:50%; border:3px solid transparent; }
+    .loading-spinner__ring::before { border-top-color:var(--accent-primary); animation:spin 0.8s linear infinite; }
+    .loading-spinner__ring::after { border-bottom-color:var(--accent-secondary); animation:spin 1.2s linear infinite reverse; inset:4px; }
+    .loading-spinner__text { font-family:var(--font-mono); font-size:0.8rem; color:var(--text-muted); letter-spacing:0.08em; }
+
+    /* ── History ── */
+    .history-page { display:flex; flex-direction:column; align-items:center; width:100%; max-width:var(--max-width); gap:1.5rem; }
+    .history-header { text-align:center; margin-bottom:2rem; animation: fadeInUp 0.5s ease both; }
+    .history-header__title { font-size:1.8rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:0.4rem; }
+    .history-header__subtitle { font-size:0.9rem; color:var(--text-muted); }
+    .history-header__count { display:inline-flex; align-items:center; gap:0.4rem; margin-top:0.8rem; font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-primary); background:rgba(245,166,35,0.08); padding:0.35rem 0.8rem; border-radius:var(--radius-full); border:1px solid rgba(245,166,35,0.15); }
+    .history-list { display:flex; flex-direction:column; gap:0.6rem; width:100%; }
+    .history-item { display:flex; align-items:center; gap:1rem; padding:1rem 1.25rem; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); transition:all var(--transition-base); animation: slideInLeft 0.4s ease both; }
+    .history-item:hover { background:var(--bg-card-hover); transform:translateX(4px); }
+    .history-item__status-icon { font-size:1.5rem; width:42px; height:42px; display:flex; align-items:center; justify-content:center; border-radius:var(--radius-sm); flex-shrink:0; }
+    .history-item__status-icon--approved { background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.15); }
+    .history-item__status-icon--rejected { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.15); }
+    .history-item__content { flex:1; min-width:0; }
+    .history-item__category { font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); }
+    .history-item__result { font-weight:700; font-size:1.05rem; margin-top:0.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .history-item__date { font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); white-space:nowrap; }
+    .history-empty { text-align:center; padding:4rem 2rem; animation: fadeInUp 0.5s ease both; }
+    .history-empty__icon { font-size:3.5rem; margin-bottom:1rem; animation: float 3s ease-in-out infinite; }
+    .history-empty__title { font-size:1.2rem; font-weight:700; margin-bottom:0.5rem; }
+    .history-empty__text { font-size:0.9rem; color:var(--text-muted); max-width:280px; margin:0 auto; line-height:1.5; }
+    .history-clear-btn { display:inline-flex; align-items:center; gap:0.4rem; padding:0.5rem 1rem; margin-top:1.5rem; background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.15); border-radius:var(--radius-full); color:var(--danger); font-family:var(--font-sans); font-weight:500; font-size:0.8rem; cursor:pointer; transition:all var(--transition-base); }
+    .history-clear-btn:hover { background:rgba(248,113,113,0.15); box-shadow:0 0 16px var(--danger-glow); }
+
+    @media (max-width:480px) {
+      .navbar { padding:0 1rem; }
+      .navbar__title { font-size:1rem; }
+      .navbar__link { padding:0.4rem 0.8rem; font-size:0.78rem; }
+      .main-content { padding:calc(var(--nav-height)+1.5rem) 1rem 2rem; }
+      .home-hero__title { font-size:1.6rem; }
+      .decision-card__result { font-size:1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ══════════ Services ══════════
+    const options = {
+      yemek: ['Sushi 🍣','Hamburger 🍔','Pizza 🍕','Kebap 🥩','Ev Yemeği 🍲','Makarna 🍝','Taco 🌮','Ramen 🍜','Waffle 🧇','Pide 🫓','Lahmacun 🫓','Çiğ Köfte 🌯'],
+      mekan: ['Dart Kafe 🎯','Sahil 🏖️','Teras Bar 🍹','Oyun Salonu 🕹️','Kitap Kafe 📚','Sinema 🎬','Piknik Alanı 🌳','Bowling 🎳','Müze 🏛️','Açık Hava Konseri 🎤'],
+      aktivite: ['Parkta Yürüyüş 🚶','Kutu Oyunu 🎲','Bowling 🎳','Konsol Oyunu 🎮','Bisiklet Turu 🚴','Film Gecesi 🎥','Karaoke 🎤','Paintball 🔫','Escape Room 🔐','Mini Golf ⛳','Go-Kart 🏎️']
+    };
+
+    const fetchRandomDecision = (category) =>
+      new Promise(resolve => setTimeout(() => {
+        const pool = options[category] || [];
+        resolve({ category, result: pool[Math.floor(Math.random() * pool.length)] || '?' });
+      }, 800));
+
+    const saveDecision = (decision) =>
+      new Promise(resolve => setTimeout(() => {
+        const h = JSON.parse(localStorage.getItem('antiFarkHistory') || '[]');
+        h.push({ id: Date.now(), title: decision.title, result: decision.result, status: decision.status, date: new Date().toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) });
+        localStorage.setItem('antiFarkHistory', JSON.stringify(h));
+        resolve(true);
+      }, 300));
+
+    const getDecisionHistory = () =>
+      new Promise(resolve => setTimeout(() => {
+        resolve([...JSON.parse(localStorage.getItem('antiFarkHistory') || '[]')].reverse());
+      }, 400));
+
+    const clearHistory = () => localStorage.removeItem('antiFarkHistory');
+
+    // ══════════ Components ══════════
+    const LoadingSpinner = ({ message = 'Gizli kurye yolda...' }) => (
+      <div className="loading-spinner">
+        <div className="loading-spinner__ring" />
+        <span className="loading-spinner__text">{message}</span>
+      </div>
+    );
+
+    const DecisionCard = ({ title, result }) => {
+      const [status, setStatus] = useState(null);
+      const [saving, setSaving] = useState(false);
+      useEffect(() => { setStatus(null); setSaving(false); }, [result]);
+
+      const handle = async (approved) => {
+        if (saving) return;
+        setSaving(true);
+        const s = approved ? 'approved' : 'rejected';
+        await saveDecision({ title, result, status: s });
+        setStatus(s);
+        setSaving(false);
+      };
+
+      return (
+        <div className="decision-card">
+          <span className="decision-card__label">{title}</span>
+          <div className="decision-card__result">{result || '—'}</div>
+          {!status ? (
+            <div className="decision-card__actions">
+              <button className="decision-card__btn decision-card__btn--approve" onClick={() => handle(true)} disabled={saving}>✅ Yaptık</button>
+              <button className="decision-card__btn decision-card__btn--reject" onClick={() => handle(false)} disabled={saving}>❌ Yapmadık</button>
+            </div>
+          ) : (
+            <div className={`decision-card__feedback decision-card__feedback--${status}`}>
+              {status === 'approved' ? '✅ Karar onaylandı!' : '❌ Karar pas geçildi.'}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ══════════ Pages ══════════
+    const categories = [
+      { key:'yemek', title:'Yemek Önerisi', emoji:'🥘', label:'Ne Yiyelim?', subtitle:'Rastgele bir lezzet keşfet' },
+      { key:'mekan', title:'Mekan Önerisi', emoji:'📍', label:'Nereye Gidelim?', subtitle:'Bugünün rotası belirlensin' },
+      { key:'aktivite', title:'Aktivite Önerisi', emoji:'🎲', label:'Ne Yapalım?', subtitle:'Sıkıntıya son ver' }
+    ];
+
+    const HomePage = () => {
+      const [loading, setLoading] = useState(false);
+      const [decision, setDecision] = useState(null);
+      const [activeTitle, setActiveTitle] = useState('');
+
+      const handleDecision = async (cat) => {
+        setLoading(true); setDecision(null); setActiveTitle(cat.title);
+        const data = await fetchRandomDecision(cat.key);
+        setDecision(data.result); setLoading(false);
+      };
+
+      return (
+        <div className="home-page">
+          <div className="home-hero">
+            <div className="home-hero__icon">🎯</div>
+            <h1 className="home-hero__title">Kararsız mısınız? <span>Biz karar verelim.</span></h1>
+            <p className="home-hero__subtitle">Bir kategori seçin, gizli kuryemiz size rastgele bir öneri getirsin.</p>
+          </div>
+          <div className="home-categories">
+            {categories.map(cat => (
+              <button key={cat.key} className="category-btn" onClick={() => handleDecision(cat)} disabled={loading}>
+                <span className="category-btn__emoji">{cat.emoji}</span>
+                <span className="category-btn__info">
+                  <span className="category-btn__title">{cat.label}</span>
+                  <span className="category-btn__subtitle">{cat.subtitle}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="home-result">
+            {loading && <LoadingSpinner />}
+            {!loading && decision && <DecisionCard title={activeTitle} result={decision} />}
+          </div>
+        </div>
+      );
+    };
+
+    const HistoryPage = () => {
+      const [history, setHistory] = useState([]);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => { getDecisionHistory().then(d => { setHistory(d); setLoading(false); }); }, []);
+
+      const handleClear = () => { clearHistory(); setHistory([]); };
+
+      if (loading) return <LoadingSpinner message="Geçmiş yükleniyor..." />;
+
+      const ac = history.filter(r => r.status === 'approved').length;
+      const rc = history.filter(r => r.status === 'rejected').length;
+
+      return (
+        <div className="history-page">
+          <div className="history-header">
+            <h1 className="history-header__title">Karar Geçmişi</h1>
+            <p className="history-header__subtitle">Grubun önceki kararları ve durumları</p>
+            {history.length > 0 && <div className="history-header__count">📊 {history.length} karar — {ac} onay, {rc} red</div>}
+          </div>
+          {history.length === 0 ? (
+            <div className="history-empty">
+              <div className="history-empty__icon">📭</div>
+              <h3 className="history-empty__title">Henüz karar yok</h3>
+              <p className="history-empty__text">Ana sayfadan bir kategori seçip karar verin, burada kronolojik olarak listelenecek.</p>
+            </div>
+          ) : (
+            <>
+              <div className="history-list">
+                {history.map((record, i) => (
+                  <div key={record.id} className="history-item" style={{animationDelay:`${i*0.05}s`}}>
+                    <div className={`history-item__status-icon history-item__status-icon--${record.status}`}>{record.status === 'approved' ? '✅' : '❌'}</div>
+                    <div className="history-item__content">
+                      <div className="history-item__category">{record.title}</div>
+                      <div className="history-item__result">{record.result}</div>
+                    </div>
+                    <div className="history-item__date">{record.date}</div>
+                  </div>
+                ))}
+              </div>
+              <button className="history-clear-btn" onClick={handleClear}>🗑️ Geçmişi Temizle</button>
+            </>
+          )}
+        </div>
+      );
+    };
+
+    // ══════════ App ══════════
+    const App = () => {
+      const [currentPage, setCurrentPage] = useState('home');
+
+      return (
+        <div className="app-container">
+          <nav className="navbar">
+            <div className="navbar__brand" onClick={() => setCurrentPage('home')}>
+              <span className="navbar__logo">🎲</span>
+              <span className="navbar__title">Anti-Fark Etmez</span>
+            </div>
+            <div className="navbar__links">
+              <button className={`navbar__link ${currentPage === 'home' ? 'navbar__link--active' : ''}`} onClick={() => setCurrentPage('home')}>
+                <span className="navbar__link-icon">🏠</span> Karar Ver
+              </button>
+              <button className={`navbar__link ${currentPage === 'history' ? 'navbar__link--active' : ''}`} onClick={() => setCurrentPage('history')}>
+                <span className="navbar__link-icon">📋</span> Geçmiş
+              </button>
+            </div>
+          </nav>
+          <main className="main-content">
+            {currentPage === 'home' ? <HomePage /> : <HistoryPage />}
+          </main>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
