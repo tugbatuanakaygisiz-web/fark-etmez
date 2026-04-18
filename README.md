@@ -9,11 +9,11 @@ Bu sürüm, projenin **İlk Aşama: Frontend** ayağını temsil etmektedir. Mim
 
 Proje geliştirilirken paylaşılan teknik dökümana sadık kalınarak, her klasörün sorumluluk alanı net bir şekilde ayrılmıştır:
 
-- **src/services/ (Gizli Kuryeler):** Veri yönetimini merkeze aldık. [cite_start]Şu an veriler yerel hafızadan çekilse de, asenkron yapısı sayesinde yarın eklenecek gerçek bir Backend entegrasyonu için "kurye" yollarımız şimdiden hazırlandı[cite: 18, 19].
-- [cite_start]**src/components/ (Bileşenler):** "LEGO" mantığını benimsedik[cite: 15]. [cite_start]Karar kartları ve onay butonları gibi parçalar, projenin her yerinde tekrar kullanılabilir şekilde atomize edildi[cite: 14].
-- **src/pages/ (Sayfalar):** Karmaşayı önlemek için bileşenlerin bir araya gelerek oluşturduğu tam ekranları burada topladık. Örneğin; [cite_start]Giriş ekranı ve Geçmiş ekranı ayrı birer 'page' olarak tanımlandı[cite: 16, 17].
-- **src/styles/ (Tasarım Ofisi):** Sitenin görsel dili ve kullanıcı deneyimi burada belirlendi. [cite_start]"Makyaj odası" olarak adlandırılan bu bölüm, kodun işlevselliğini şık bir arayüzle buluşturdu[cite: 20].
-- [cite_start]**src/assets/ (Depo):** Uygulamanın medya kütüphanesi olarak projenin tüm görsel kaynaklarını burada organize ettik[cite: 13].
-- [cite_start]**public/ (Dış Kapı):** Kullanıcıyı karşılayan ilk temas noktası olan ana HTML ve tarayıcı ayarları burada muhafaza edildi[cite: 11, 12].
+- **src/services/ (Gizli Kuryeler):** Veri yönetimini merkeze aldık. Şu an veriler yerel hafızadan çekilse de, asenkron yapısı sayesinde yarın eklenecek gerçek bir Backend entegrasyonu için "kurye" yollarımız şimdiden hazırlandı.
+- **src/components/ (Bileşenler):** "LEGO" mantığını benimsedik. Karar kartları ve onay butonları gibi parçalar, projenin her yerinde tekrar kullanılabilir şekilde atomize edildi.
+- **src/pages/ (Sayfalar):** Karmaşayı önlemek için bileşenlerin bir araya gelerek oluşturduğu tam ekranları burada topladık. Örneğin; Giriş ekranı ve Geçmiş ekranı ayrı birer 'page' olarak tanımlandı.
+- **src/styles/ (Tasarım Ofisi):** Sitenin görsel dili ve kullanıcı deneyimi burada belirlendi. "Makyaj odası" olarak adlandırılan bu bölüm, kodun işlevselliğini şık bir arayüzle buluşturdu.
+- **src/assets/ (Depo):** Uygulamanın medya kütüphanesi olarak projenin tüm görsel kaynaklarını burada organize ettik.
+- **public/ (Dış Kapı):** Kullanıcıyı karşılayan ilk temas noktası olan ana HTML ve tarayıcı ayarları burada muhafaza edildi.
 
 
